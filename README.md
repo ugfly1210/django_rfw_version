@@ -90,3 +90,63 @@ django form 组件也可以用在 restframework。
         print(request.version)
         print(request.versioning_scheme)
   ```
+  
+  ### 2. 解析器
+  解析器对请求的数据解析
+  d_rdw 是针对请求头解析。
+  
+  request.POST 不一定拿得到值，这个和 Content_Type 有关。
+  - Content_Type : application/url-encoding
+    - 以这个发送的话，post 和 body 里面都会有值。
+    - 弊端：只有在 body 里可以拿到Bytes 类型的变态大叔。
+
+  - d_rdw： parse_classes = [JONParse ,FormDataParse]
+  - 最常用的即 JSONParse
+  解析器小总结：
+    - 何时执行？ 只有执行 request.data/request.FILES/reqeust.POST
+      - 根据 content_type头，判断是否支持。
+```python
+2. rest framework解析器
+		请求的数据进行解析：请求体进行解析。表示服务端可以解析的数据格式的种类。
+		
+			Content-Type: application/url-encoding.....
+			request.body
+			request.POST
+			
+			Content-Type: application/json.....
+			request.body
+			request.POST
+		
+		客户端：
+			Content-Type: application/json
+			'{"name":"alex","age":123}'
+		
+		服务端接收：
+			读取客户端发送的Content-Type的值 application/json
+			
+			parser_classes = [JSONParser,]
+			media_type_list = ['application/json',]
+		
+			如果客户端的Content-Type的值和 application/json 匹配：JSONParser处理数据
+			如果客户端的Content-Type的值和 application/x-www-form-urlencoded 匹配：FormParser处理数据
+		
+		
+		配置：
+			单视图：
+			class UsersView(APIView):
+				parser_classes = [JSONParser,]
+				
+			全局配置：
+				REST_FRAMEWORK = {
+					'VERSION_PARAM':'version',
+					'DEFAULT_VERSION':'v1',
+					'ALLOWED_VERSIONS':['v1','v2'],
+					# 'DEFAULT_VERSIONING_CLASS':"rest_framework.versioning.HostNameVersioning"
+					'DEFAULT_VERSIONING_CLASS':"rest_framework.versioning.URLPathVersioning",
+					'DEFAULT_PARSER_CLASSES':[
+						'rest_framework.parsers.JSONParser',
+						'rest_framework.parsers.FormParser',
+					]
+				}
+
+```
